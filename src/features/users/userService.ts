@@ -1,5 +1,5 @@
 import axiosClient from '../../api/axiosClient'
-import type { User, CreateUserRequest, UpdateUserRequest, ResetPasswordRequest, UsersListResponse } from '../../types/user'
+import type { User, CreateUserRequest, UpdateUserRequest, UsersListResponse } from '../../types/user'
 
 export const userService = {
   fetchUsers: async (page = 1, pageSize = 10, search?: string) => {

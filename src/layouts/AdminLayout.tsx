@@ -38,7 +38,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
 
           <nav className="flex-1 px-2 py-4">
-            {SIDEBAR_ITEMS.map((item) => {
+            {SIDEBAR_ITEMS.filter((item) => !item.adminOnly || role === 'ADMIN').map((item) => {
               const Icon = item.icon
               return (
                 <NavLink
@@ -61,10 +61,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
           <div className="border-t border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">{user?.name?.charAt(0)}</div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">{(user?.fullName ?? user?.name ?? 'A').charAt(0)}</div>
               {!collapsed && (
                 <div className="flex-1 space-y-1">
-                  <p className="font-semibold">{user?.name ?? 'Admin User'}</p>
+                  <p className="font-semibold">{user?.fullName ?? user?.name ?? 'Admin User'}</p>
                   <p className="text-xs text-slate-500">{role ?? 'Administrator'}</p>
                 </div>
               )}
@@ -86,7 +86,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Workspace</p>
-                <h1 className="text-xl font-semibold text-slate-900">{breadcrumb || 'Dashboard'}</h1>
+                <h1 className="text-dxl font-semibold text-slate-900">{breadcrumb || 'Dashboard'}</h1>
               </div>
               <div className="flex items-center gap-3">
                 <div className="hidden rounded-2xl bg-white px-4 py-3 shadow-sm shadow-slate-950/5 sm:flex">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { User, UserRole } from '../../types/user'
+import type { User } from '../../types/user'
+import { UserRole } from '../../types/user'
 import { useUpdateUserMutation, useResetPasswordMutation } from '../../features/users/useUserQuery'
 import { Button } from '../forms/Button'
 import { TextInput } from '../forms/TextInput'
@@ -11,7 +12,7 @@ interface EditUserModalProps {
 }
 
 export function EditUserModal({ isOpen, user, onClose }: EditUserModalProps) {
-  const [form, setForm] = useState({ email: '', fullName: '', role: UserRole.TEACHER })
+  const [form, setForm] = useState<{ email: string; fullName: string; role: UserRole }>({ email: '', fullName: '', role: UserRole.TEACHER })
   const [resetPassword, setResetPassword] = useState('')
   const [showResetPassword, setShowResetPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -96,6 +97,7 @@ export function EditUserModal({ isOpen, user, onClose }: EditUserModalProps) {
             <div className="space-y-2 rounded-3xl border border-amber-200 bg-amber-50 p-4">
               <label className="block text-sm font-semibold text-slate-800">New password</label>
               <TextInput
+                label="New password"
                 type="password"
                 value={resetPassword}
                 onChange={(e) => setResetPassword(e.target.value)}

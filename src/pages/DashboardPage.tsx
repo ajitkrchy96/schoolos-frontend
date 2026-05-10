@@ -3,13 +3,15 @@ import { DashboardSkeleton } from '../features/dashboard/DashboardSkeleton'
 import { StatCard } from '../components/cards/StatCard'
 
 export default function DashboardPage() {
-  const { data, isLoading, isError, error } = useDashboardQuery()
+  const { data, isLoading, isFetching, isError, error } = useDashboardQuery()
+
+  const isEmptyState = !data || Object.values(data).every((value) => value === 0)
 
   if (isLoading) {
     return <DashboardSkeleton />
   }
 
-  if (isError || !data) {
+  if (isError) {
     return (
       <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-rose-900">
         <h2 className="text-xl font-semibold">Unable to load dashboard</h2>
@@ -18,8 +20,28 @@ export default function DashboardPage() {
     )
   }
 
+  if (isEmptyState) {
+    return (
+      <div className="rounded-3xl border border-slate-200 bg-white p-8 text-slate-700">
+        <h2 className="text-xl font-semibold text-slate-900">Dashboard has no data yet</h2>
+        <p className="mt-3 text-sm text-slate-500">We could not find any summary information for your school right now.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-sm uppercase tracking-[0.3em] text-slate-500">School dashboard</p>
+          <h1 className="text-3xl font-semibold text-slate-900">Overview</h1>
+          <p className="mt-2 text-sm text-slate-500">Key metrics for school performance and operations.</p>
+        </div>
+        {isFetching && (
+          <div className="rounded-3xl bg-slate-100 px-4 py-2 text-sm text-slate-700">Refreshing data...</div>
+        )}
+      </div>
+
       <div className="grid gap-6 xl:grid-cols-5 lg:grid-cols-2">
         <StatCard label="Total students" value={data.totalStudents} accent="bg-indigo-500" />
         <StatCard label="Present today" value={data.presentToday} accent="bg-emerald-500" />

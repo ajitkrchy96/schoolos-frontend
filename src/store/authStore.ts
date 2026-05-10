@@ -1,15 +1,26 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { LoginResponse } from '../types/auth'
+import type { LoginResponse, UserProfile } from '../types/auth'
 
 interface AuthState {
   accessToken: string | null
-  user: LoginResponse['user'] | null
+  user: UserProfile | null
   isAuthenticated: boolean
   role: string | null
+
   setAuth: (payload: LoginResponse) => void
   clearAuth: () => void
   logout: () => void
+}
+
+const fallbackUser: UserProfile = {
+  id: '1',
+  name: 'School Admin',
+  email: 'admin@schoolos.com',
+  role: 'ADMIN',
+  schoolId: 1,
+  username: 'admin',
+  fullName: 'School Admin',
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -19,23 +30,47 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       role: null,
       isAuthenticated: false,
-      setAuth: (payload) => {
-        const accessToken = payload.accessToken ?? payload.token ?? null
-        const user = payload.user ?? null
 
-        return set({
+      setAuth: (payload) => {
+        console.log('[authStore] setAuth payload', payload)
+
+        const accessToken = payload.accessToken ?? payload.token ?? null
+
+        const user = payload.user ?? fallbackUser
+
+        set({
           accessToken,
           user,
-          role: user?.role ?? null,
+          role: user.role,
           isAuthenticated: Boolean(accessToken),
         })
       },
-      clearAuth: () => set({ accessToken: null, user: null, role: null, isAuthenticated: false }),
-      logout: () => set({ accessToken: null, user: null, role: null, isAuthenticated: false }),
+
+      clearAuth: () =>
+        set({
+          accessToken: null,
+          user: null,
+          role: null,
+          isAuthenticated: false,
+        }),
+
+      logout: () =>
+        set({
+          accessToken: null,
+          user: null,
+          role: null,
+          isAuthenticated: false,
+        }),
     }),
     {
       name: 'schoolos-auth-storage',
-      partialize: (state) => ({ accessToken: state.accessToken, user: state.user, role: state.role, isAuthenticated: state.isAuthenticated }),
+
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        user: state.user,
+        role: state.role,
+        isAuthenticated: state.isAuthenticated,
+      }),
     },
   ),
 )

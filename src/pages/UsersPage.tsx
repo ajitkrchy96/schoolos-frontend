@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { User } from '../types/user'
+import type { User } from '../types/user'
 import { useUsersQuery, useDisableUserMutation } from '../features/users/useUserQuery'
 import { useAuthStore } from '../store/authStore'
 import { UserTable } from '../components/tables/UserTable'

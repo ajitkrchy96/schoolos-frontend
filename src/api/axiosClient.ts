@@ -15,8 +15,12 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken
+    console.log('[axiosClient] Request interceptor - token present:', !!token, 'URL:', config.url)
     if (token && config?.headers) {
       config.headers.Authorization = `Bearer ${token}`
+      console.log('[axiosClient] Added Authorization header')
+    } else {
+      console.log('[axiosClient] No token available for request')
     }
     return config
   },
@@ -26,14 +30,23 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
+    //if (error.response?.status === 401) {
+      //useAuthStore.getState().logout()
+      //window.location.href = '/login'
+    //}
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout()
-      window.location.href = '/login'
-    }
+  console.warn('[axiosClient] Unauthorized request detected')
+
+  // TEMPORARY:
+  // Disable automatic logout during development
+
+  // useAuthStore.getState().logout()
+  // window.location.href = '/login'
+}
 
     const message =
       error.response?.data && typeof error.response.data === 'object' && 'message' in error.response.data
-        ? (error.response.data as any).message
+        ? (error.response.data as { message?: string }).message
         : error.message
 
     return Promise.reject(new Error(message ?? 'Unable to complete request'))

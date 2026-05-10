@@ -1,4 +1,4 @@
-import { User } from '../../types/user'
+import type { User } from '../../types/user'
 import { RoleBadge, StatusBadge } from '../badges/UserBadges'
 import { Button } from '../forms/Button'
 

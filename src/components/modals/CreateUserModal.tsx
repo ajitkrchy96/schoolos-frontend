@@ -10,7 +10,7 @@ interface CreateUserModalProps {
 }
 
 export function CreateUserModal({ isOpen, onClose }: CreateUserModalProps) {
-  const [form, setForm] = useState({ username: '', email: '', fullName: '', password: '', role: UserRole.TEACHER })
+  const [form, setForm] = useState<{ username: string; email: string; fullName: string; password: string; role: UserRole }>({ username: '', email: '', fullName: '', password: '', role: UserRole.TEACHER })
   const [error, setError] = useState<string | null>(null)
   const createUserMutation = useCreateUserMutation()
 

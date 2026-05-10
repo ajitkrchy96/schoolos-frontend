@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { authService } from '../features/auth/authService'
 import { Button } from '../components/forms/Button'
@@ -7,29 +7,31 @@ import { TextInput } from '../components/forms/TextInput'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const location = useLocation()
   const setAuth = useAuthStore((state) => state.setAuth)
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-
-  const from = ((location.state as { from?: { pathname?: string } })?.from?.pathname as string) || '/dashboard'
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
     setLoading(true)
 
+    console.log('[LoginPage] handleSubmit')
+
     try {
       const response = await authService.login({ username: form.username, password: form.password })
       setAuth(response)
-      navigate(from, { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (err) {
+      
       console.error('[LoginPage] login error', err)
       const message = err instanceof Error ? err.message : 'Unable to sign in'
+      //alert('LOGIN CLICKED ERROR '+ message)
       setError(message === 'Network Error' ? 'Unable to reach the authentication service.' : message)
     } finally {
       setLoading(false)
+      //alert('LOGIN CLICKED END')
     }
   }
 

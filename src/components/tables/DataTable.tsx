@@ -1,5 +1,13 @@
+import { type ReactNode } from 'react'
+
+interface DataTableColumn<T extends object> {
+  label: string
+  accessor: keyof T
+  render?: (item: T) => ReactNode
+}
+
 interface DataTableProps<T extends object> {
-  columns: Array<{ label: string; accessor: keyof T }>
+  columns: Array<DataTableColumn<T>>
   data: T[]
   emptyMessage?: string
 }
@@ -29,10 +37,11 @@ export function DataTable<T extends object>({ columns, data, emptyMessage = 'No 
           {data.map((item, rowIndex) => (
             <tr key={rowIndex} className="border-t border-slate-100 hover:bg-slate-50">
               {columns.map((column) => {
-                const value = item[column.accessor] as unknown
+                const rendered = column.render ? column.render(item) : item[column.accessor]
+                const cellValue = rendered === null || rendered === undefined ? '-' : rendered
                 return (
                   <td key={String(column.accessor)} className="px-5 py-4 align-top text-slate-700">
-                    {value === null || value === undefined ? '-' : String(value)}
+                    {cellValue as React.ReactNode}
                   </td>
                 )
               })}
