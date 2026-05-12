@@ -7,8 +7,9 @@ export const studentService = {
   fetchStudents: async (params: { search?: string; page?: number; pageSize?: number }) => {
     const endpoint = params.search ? `/schools/${SCHOOL_ID}/students/search` : `/schools/${SCHOOL_ID}/students`
     const requestParams: Record<string, string | number> = {
-      page: params.page ?? 1,
-      pageSize: params.pageSize ?? 10,
+      page: params.page ?? 0,
+      //page: 0,
+      size: params.pageSize ?? 10,
     }
 
     if (params.search) {

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { attendanceService } from './attendanceService'
-import type { AttendanceRecord, AttendanceSummary, MarkAttendanceRequest } from '../../types/attendance'
+import type { AttendanceSummary, MarkAttendanceRequest } from '../../types/attendance'
 
 const ATTENDANCE_QUERY_KEY = ['attendance'] as const
 
@@ -21,7 +21,7 @@ export function useAttendanceSummaryQuery(date: string) {
 }
 
 export function useAttendanceByDateQuery(date: string) {
-  return useQuery<{ records: AttendanceRecord[] }, Error>({
+  return useQuery({
     queryKey: attendanceQueryKeys.byDate(date),
     queryFn: () => attendanceService.fetchAttendanceByDate(date),
     enabled: Boolean(date),

@@ -9,8 +9,8 @@ export interface Student {
   dob: string
   admissionNo: string
   phone: string
-  classId: string
-  sectionId: string
+  classId: number
+  sectionId: number
   fatherName: string
   motherName: string
   parentPhone: string
@@ -20,8 +20,8 @@ export interface Student {
 }
 
 export interface StudentListResponse {
-  items: Student[]
-  total: number
+  content: Student[]
+  totalElements: number
 }
 
 export interface CreateStudentRequest {
@@ -31,14 +31,15 @@ export interface CreateStudentRequest {
   dob: string
   admissionNo: string
   phone: string
-  classId: string
-  sectionId: string
+  classId: number
+  sectionId: number
   fatherName: string
   motherName: string
   parentPhone: string
   parentEmail: string
   parentAddress: string
   status: StudentStatus
+  schoolId: number
 }
 
 export type UpdateStudentRequest = CreateStudentRequest

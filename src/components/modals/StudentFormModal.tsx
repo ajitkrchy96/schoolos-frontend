@@ -3,6 +3,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '../forms/Button'
 import { TextInput } from '../forms/TextInput'
+import { FormSelect } from '../forms/FormSelect'
+import { useClassesQuery } from '../../hooks/master/useClassesQuery'
+import { useSectionsQuery } from '../../hooks/master/useSectionsQuery'
 import { studentSchema, type StudentFormValues } from '../../features/students/studentSchema'
 
 interface StudentFormModalProps {
@@ -24,13 +27,16 @@ export function StudentFormModal({
   onClose,
   onSubmit,
 }: StudentFormModalProps) {
+  const classesQuery = useClassesQuery()
+  const sectionsQuery = useSectionsQuery()
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<StudentFormValues>({
-    resolver: zodResolver(studentSchema),
+    resolver: zodResolver(studentSchema) as any,
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -38,8 +44,8 @@ export function StudentFormModal({
       dob: '',
       admissionNo: '',
       phone: '',
-      classId: '',
-      sectionId: '',
+      classId: undefined,
+      sectionId: undefined,
       fatherName: '',
       motherName: '',
       parentPhone: '',
@@ -57,8 +63,8 @@ export function StudentFormModal({
       dob: '',
       admissionNo: '',
       phone: '',
-      classId: '',
-      sectionId: '',
+      classId: undefined,
+      sectionId: undefined,
       fatherName: '',
       motherName: '',
       parentPhone: '',
@@ -67,6 +73,7 @@ export function StudentFormModal({
       status: 'ACTIVE',
     })
   }, [initialValues, reset])
+const isEditMode = Boolean(initialValues?.admissionNo)
 
   if (!isOpen) {
     return null
@@ -85,7 +92,11 @@ export function StudentFormModal({
           </button>
         </div>
 
-        <form className="mt-8 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+          <form className="mt-8 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit((data) => {
+            console.log('FORM SUBMITTED', data)
+            ;(onSubmit as any)(data)
+          })}
+          >
           <TextInput label="First name" error={errors.firstName?.message} {...register('firstName')} />
           <TextInput label="Last name" error={errors.lastName?.message} {...register('lastName')} />
           <div className="space-y-2">
@@ -100,13 +111,51 @@ export function StudentFormModal({
             </select>
           </div>
           <TextInput label="Date of birth" type="date" error={errors.dob?.message} {...register('dob')} />
-          <TextInput label="Admission No." error={errors.admissionNo?.message} {...register('admissionNo')} />
-          <TextInput label="Phone" error={errors.phone?.message} {...register('phone')} />
-          <TextInput label="Class ID" error={errors.classId?.message} {...register('classId')} />
-          <TextInput label="Section ID" error={errors.sectionId?.message} {...register('sectionId')} />
+          {/* <TextInput
+            label="Admission No."
+            error={errors.admissionNo?.message}
+            {...register('admissionNo')}
+            readOnly={isEditMode}
+          /> */}
+          {isEditMode && (
+            <TextInput
+              label="Admission No."
+              {...register('admissionNo')}
+              readOnly
+            />
+          )}
+          <TextInput label="Phone" maxLength={10} inputMode="numeric" error={errors.phone?.message} {...register('phone')} />
+          <FormSelect
+            label="Class"
+            options={classesQuery.data ?? []}
+            isLoading={classesQuery.isLoading}
+            isError={classesQuery.isError}
+            error={errors.classId?.message}
+            placeholder="Select a class"
+            {...register('classId', {
+              setValueAs: (value: string) => {
+                if (value === '' || value === undefined) return undefined
+                return Number(value)
+              },
+            })}
+          />
+          <FormSelect
+            label="Section"
+            options={sectionsQuery.data ?? []}
+            isLoading={sectionsQuery.isLoading}
+            isError={sectionsQuery.isError}
+            error={errors.sectionId?.message}
+            placeholder="Select a section"
+            {...register('sectionId', {
+              setValueAs: (value: string) => {
+                if (value === '' || value === undefined) return undefined
+                return Number(value)
+              },
+            })}
+          />
           <TextInput label="Father's name" error={errors.fatherName?.message} {...register('fatherName')} />
           <TextInput label="Mother's name" error={errors.motherName?.message} {...register('motherName')} />
-          <TextInput label="Parent phone" error={errors.parentPhone?.message} {...register('parentPhone')} />
+          <TextInput label="Parent phone" maxLength={10} inputMode="numeric" error={errors.parentPhone?.message} {...register('parentPhone')} />
           <TextInput label="Parent email" type="email" error={errors.parentEmail?.message} {...register('parentEmail')} />
           <TextInput label="Parent address" error={errors.parentAddress?.message} {...register('parentAddress')} />
           <div className="space-y-2">

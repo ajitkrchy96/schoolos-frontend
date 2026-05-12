@@ -19,13 +19,26 @@ export default function AttendancePage() {
   const attendanceQuery = useAttendanceByDateQuery(selectedDate)
   const markAttendanceMutation = useMarkAttendanceMutation()
 
-  const records = useMemo(() => attendanceQuery.data?.records ?? [], [attendanceQuery.data])
+  // const records = useMemo(() => attendanceQuery.data?.records ?? [], [attendanceQuery.data])
+  const records = useMemo(() => attendanceQuery.data ?? [], [attendanceQuery.data])
 
-  const handleMarkAttendance = async (payload: { studentId: string; date: string; status: 'PRESENT' | 'ABSENT' }) => {
-    await markAttendanceMutation.mutateAsync(payload)
+const handleMarkAttendance = async (payload: { studentId: string; date: string; status: 'PRESENT' | 'ABSENT' }) => {
+  try {
+    await markAttendanceMutation.mutateAsync({
+      studentId: Number(payload.studentId),
+      date: payload.date,
+      status: payload.status,
+    })
+
+    attendanceQuery.refetch()
+    summaryQuery.refetch()
+
     setIsMarkOpen(false)
     setSelectedRecord(null)
+  } catch (error) {
+    console.error('Attendance save failed', error)
   }
+}
 
   return (
     <div className="space-y-6">
@@ -76,9 +89,10 @@ export default function AttendancePage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/5">
             <h3 className="text-lg font-semibold text-slate-900">Summary</h3>
             <div className="mt-6 grid gap-4">
-              <StatCard label="Present" value={summaryQuery.data?.present ?? 0} accent="bg-emerald-500" />
-              <StatCard label="Absent" value={summaryQuery.data?.absent ?? 0} accent="bg-rose-500" />
-              <StatCard label="Total" value={summaryQuery.data?.total ?? 0} accent="bg-slate-500" />
+              {/* <StatCard label="Present" value={summaryQuery.data?.present ?? 0} accent="bg-emerald-500" /> */}
+              <StatCard label="Present" value={summaryQuery.data?.presentCount ?? 0} accent="bg-emerald-500" />
+              <StatCard label="Absent" value={summaryQuery.data?.absentCount ?? 0} accent="bg-rose-500" />
+              <StatCard label="Total" value={(summaryQuery.data?.presentCount ?? 0) + (summaryQuery.data?.absentCount ?? 0)} accent="bg-slate-500" />
             </div>
           </div>
         </div>

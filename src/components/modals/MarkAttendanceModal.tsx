@@ -70,8 +70,23 @@ export function MarkAttendanceModal({ isOpen, studentId, studentName, date, onCl
             <Button variant="secondary" type="button" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            {/* <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Saving…' : 'Save attendance'}
+            </Button> */}
+            <Button
+                type="button"
+                disabled={isLoading}
+                onClick={() => {
+                    console.log('SAVE BUTTON CLICKED')
+
+                    onSubmit({
+                    studentId: studentId ?? '',
+                    date,
+                    status: 'PRESENT',
+                    })
+                }}
+                >
+                {isLoading ? 'Saving…' : 'Save attendance'}
             </Button>
           </div>
         </form>

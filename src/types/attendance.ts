@@ -11,13 +11,13 @@ export interface AttendanceRecord {
 }
 
 export interface AttendanceSummary {
-  present: number
-  absent: number
+  presentCount: number
+  absentCount: number
   total: number
 }
 
 export interface MarkAttendanceRequest {
-  studentId: string
+  studentId: number
   date: string
   status: AttendanceStatus
 }

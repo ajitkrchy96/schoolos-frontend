@@ -27,18 +27,30 @@ export default function StudentsPage() {
   const updateMutation = useUpdateStudentMutation()
   const deleteMutation = useDeleteStudentMutation()
 
-  const students = useMemo(() => data?.items ?? [], [data])
-  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
+  const students = useMemo(() => data?.content ?? [], [data])
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil((data?.totalElements ?? 0) / PAGE_SIZE),
+  )
 
   const handleCreate = async (payload: Omit<Student, 'id'>) => {
-    await createMutation.mutateAsync(payload)
+    // await createMutation.mutateAsync(payload)
+    await createMutation.mutateAsync({
+    ...payload,
+    schoolId: 1,
+    })
     setIsCreateOpen(false)
     setPage(1)
   }
 
   const handleUpdate = async (payload: Omit<Student, 'id'>) => {
     if (!selectedStudent) return
-    await updateMutation.mutateAsync({ studentId: selectedStudent.id, payload })
+    await updateMutation.mutateAsync({ studentId: selectedStudent.id, 
+      payload: {
+      ...payload,
+      schoolId: 1,
+    }, })
     setIsEditOpen(false)
     setSelectedStudent(null)
   }
@@ -67,7 +79,7 @@ export default function StudentsPage() {
           value={search}
           onChange={(event) => {
             setSearch(event.target.value)
-            setPage(1)
+            setPage(0)
           }}
           placeholder="Search students"
           className="rounded-3xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
