@@ -5,6 +5,7 @@ import {
   CalendarToday as AttendanceIcon,
   Notifications as NotificationsIcon,
   People as UsersIcon,
+  PersonOff as StudentStatusIcon,
 } from '@mui/icons-material'
 
 export const SIDEBAR_ITEMS = [
@@ -23,6 +24,11 @@ export const SIDEBAR_ITEMS = [
     label: 'Students',
     path: '/students',
     icon: StudentsIcon,
+  },
+  {
+    label: 'Student Status',
+    path: '/student-status',
+    icon: StudentStatusIcon,
   },
   {
     label: 'Fees',

@@ -1,23 +1,26 @@
 export type AttendanceStatus = 'PRESENT' | 'ABSENT'
 
 export interface AttendanceRecord {
-  id: string
-  studentId: string
+  attendanceId: number | null
+  studentId: number
   studentName: string
-  date: string
-  status: AttendanceStatus
   className: string
-  sectionName: string
+  date: string
+  status: AttendanceStatus | null
 }
 
 export interface AttendanceSummary {
-  presentCount: number
+  presentCount : number
   absentCount: number
   total: number
 }
 
-export interface MarkAttendanceRequest {
+export interface CreateAttendanceRequest {
   studentId: number
   date: string
+  status: AttendanceStatus
+}
+
+export interface UpdateAttendanceRequest {
   status: AttendanceStatus
 }

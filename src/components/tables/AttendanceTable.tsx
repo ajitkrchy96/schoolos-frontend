@@ -16,19 +16,31 @@ export function AttendanceTable({ records, onMark }: AttendanceTableProps) {
             <th className="px-5 py-4 font-semibold">Date</th>
             <th className="px-5 py-4 font-semibold">Class</th>
             <th className="px-5 py-4 font-semibold">Status</th>
-            <th className="px-5 py-4 font-semibold">Actions</th>
+            <th className="px-5 py-4 font-semibold">Action</th>
           </tr>
         </thead>
         <tbody>
           {records.map((record) => (
-            <tr key={record.id} className="border-t border-slate-100 hover:bg-slate-50">
+            <tr key={record.attendanceId ?? record.studentId} className="border-t border-slate-100 hover:bg-slate-50">
               <td className="px-5 py-4 align-top text-slate-700">{record.studentName}</td>
               <td className="px-5 py-4 align-top text-slate-700">{record.date}</td>
               <td className="px-5 py-4 align-top text-slate-700">{record.className}</td>
-              <td className="px-5 py-4 align-top text-slate-700">{record.status}</td>
+              <td className="px-5 py-4 align-top">
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                    record.status === 'PRESENT'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : record.status === 'ABSENT'
+                      ? 'bg-rose-100 text-rose-700'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {record.status ?? 'Not Marked'}
+                </span>
+              </td>
               <td className="px-5 py-4 align-top text-slate-700">
                 <Button variant="secondary" type="button" onClick={() => onMark(record)}>
-                  Mark
+                  {record.attendanceId == null ? 'Mark' : 'Update'}
                 </Button>
               </td>
             </tr>

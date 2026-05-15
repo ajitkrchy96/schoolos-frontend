@@ -1,36 +1,50 @@
-export type FeeStatus = 'PENDING' | 'PAID' | 'OVERDUE'
-export type PaymentMethod = 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER'
+export type FeeStatus = 'PENDING' | 'PARTIAL' | 'PAID'
+export type PaymentMode = 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER'
 
-export interface Fee {
-  id: string
-  studentId: string
+export interface FeeRecord {
+  id: string | number
+  studentId: string | number
   studentName: string
-  dueDate: string
-  amount: number
-  paidAmount: number
-  balance: number
-  status: FeeStatus
+  admissionNo: string
   className: string
-  receiptUrl?: string
+  totalAmount: number
+  paidAmount: number
+  dueAmount: number
+  status: FeeStatus
 }
 
-export interface PendingFeeListResponse {
-  items: Fee[]
-  total: number
+export interface FeesListResponse {
+  content: FeeRecord[]
+  totalPages: number
+  totalElements: number
+  size: number
+  number: number
 }
 
-export interface PaymentRecord {
-  id: string
+export interface FeeSummary {
+  totalStudents: number
+  paidStudents: number
+  partialStudents: number
+  pendingStudents: number
+  totalCollected: number
+  totalDue: number
+}
+
+export interface FeePayment {
+  paymentId: string | number
   amount: number
-  method: PaymentMethod
-  status: 'COMPLETED' | 'FAILED' | 'PENDING'
+  paymentMode: PaymentMode
   paymentDate: string
-  reference: string
-  receiptUrl?: string
+  remarks: string
 }
 
-export interface FeePaymentRequest {
+export interface PayFeeRequest {
   amount: number
-  method: PaymentMethod
-  reference: string
+  paymentMode: PaymentMode
+  remarks: string
+}
+
+export interface AssignFeeRequest {
+  studentId: string | number
+  totalFee: number
 }

@@ -1,84 +1,121 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
+import { useForm, type Resolver } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '../forms/Button'
 import { TextInput } from '../forms/TextInput'
+import { createPayFeeSchema, type PayFeeFormValues } from '../../features/fees/feeSchema'
+import type { FeeRecord, PaymentMode } from '../../types/fee'
 
-export type PaymentMethod = 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER'
+const paymentModes: PaymentMode[] = ['CASH', 'UPI', 'CARD', 'BANK_TRANSFER']
 
 interface PayFeeModalProps {
   isOpen: boolean
-  feeId?: string
-  balance?: number
+  fee?: FeeRecord | null
   onClose: () => void
-  onPay: (payload: { amount: number; method: PaymentMethod; reference: string }) => void
+  onPay: (payload: PayFeeFormValues) => void
   isLoading?: boolean
 }
 
-const paymentModes: PaymentMethod[] = ['CASH', 'UPI', 'CARD', 'BANK_TRANSFER']
+export function PayFeeModal({ isOpen, fee, onClose, onPay, isLoading = false }: PayFeeModalProps) {
+  const dueAmount = fee?.dueAmount ?? 0
+  const payFeeSchema = createPayFeeSchema(dueAmount)
 
-export function PayFeeModal({ isOpen, feeId, balance, onClose, onPay, isLoading = false }: PayFeeModalProps) {
-  const [amount, setAmount] = useState('')
-  const [method, setMethod] = useState<PaymentMethod>('CASH')
-  const [reference, setReference] = useState('')
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<PayFeeFormValues>({
+    resolver: zodResolver(payFeeSchema) as Resolver<PayFeeFormValues>,
+    defaultValues: {
+      amount: 0,
+      paymentMode: 'UPI',
+      remarks: '',
+    },
+  })
 
-  if (!isOpen) {
+  useEffect(() => {
+    if (isOpen) {
+      reset({ amount: 0, paymentMode: 'UPI', remarks: '' })
+    }
+  }, [isOpen, reset])
+
+  if (!isOpen || !fee) {
     return null
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-      <div className="w-full max-w-xl rounded-3xl bg-white p-8 shadow-2xl">
+      <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-2xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Pay fee</h2>
-            <p className="text-sm text-slate-500">Complete the payment details for {feeId ?? 'selected fee'}.</p>
+            <h2 className="text-xl font-semibold text-slate-900">Pay Fee</h2>
+            <p className="text-sm text-slate-500">Record a payment for {fee.studentName}.</p>
           </div>
-          <button className="text-slate-500 hover:text-slate-900" onClick={onClose}>
-            Cancel
+          <button className="text-slate-500 hover:text-slate-900" type="button" onClick={onClose}>
+            Close
           </button>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          <TextInput
-            label="Amount"
-            type="number"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-            placeholder={balance ? `Max ${balance}` : '0.00'}
-          />
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-slate-800">Payment method</label>
-            <select
-              value={method}
-              onChange={(event) => setMethod(event.target.value as PaymentMethod)}
-              className="w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            >
-              {paymentModes.map((mode) => (
-                <option key={mode} value={mode}>
-                  {mode.replace('_', ' ')}
-                </option>
-              ))}
-            </select>
+        <form className="mt-8 grid gap-4" onSubmit={handleSubmit(onPay)}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextInput label="Student Name" value={fee.studentName} disabled />
+            <TextInput label="Admission No" value={fee.admissionNo} disabled />
+            <TextInput label="Class" value={fee.className ?? ''} disabled />
+            <TextInput label="Total Fee" value={`₹${(fee.totalAmount ?? 0).toFixed(2)}`} disabled />
+            <TextInput label="Paid Amount" value={`₹${(fee.paidAmount ?? 0).toFixed(2)}`} disabled />
+            <TextInput label="Due Amount" value={`₹${(fee.dueAmount ?? 0).toFixed(2)}`} disabled />
           </div>
-          <TextInput
-            label="Reference"
-            value={reference}
-            onChange={(event) => setReference(event.target.value)}
-            placeholder="Transaction reference"
-          />
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-            <p className="font-semibold text-slate-900">Balance</p>
-            <p>${balance?.toLocaleString() ?? '0.00'}</p>
-          </div>
-        </div>
 
-        <div className="mt-8 flex justify-end gap-3">
-          <Button variant="secondary" type="button" onClick={onClose}>
-            Close
-          </Button>
-          <Button type="button" onClick={() => onPay({ amount: Number(amount), method, reference })} disabled={isLoading}>
-            {isLoading ? 'Processing...' : 'Submit payment'}
-          </Button>
-        </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-semibold text-slate-800">Payment Amount</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                {...register('amount', { valueAsNumber: true })}
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                placeholder="0.00"
+              />
+              {errors.amount && <p className="mt-2 text-sm text-rose-600">{errors.amount.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-slate-800">Payment Mode</label>
+              <select
+                {...register('paymentMode')}
+                className="w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              >
+                {paymentModes.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {mode.replace('_', ' ')}
+                  </option>
+                ))}
+              </select>
+              {errors.paymentMode && <p className="mt-2 text-sm text-rose-600">{errors.paymentMode.message}</p>}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-800">Remarks</label>
+            <textarea
+              {...register('remarks')}
+              rows={4}
+              className="mt-2 w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              placeholder="Optional notes for this payment"
+            />
+            {errors.remarks && <p className="mt-2 text-sm text-rose-600">{errors.remarks.message}</p>}
+          </div>
+
+          <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
+            <Button variant="secondary" type="button" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Processing...' : 'Submit payment'}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   )

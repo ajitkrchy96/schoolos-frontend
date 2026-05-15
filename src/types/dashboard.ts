@@ -1,5 +1,5 @@
 export interface DashboardResponse {
-  totalStudents: number
+  // totalStudents: number
   presentToday: number
   absentToday: number
   pendingFeesCount: number

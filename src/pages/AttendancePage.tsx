@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useAttendanceByDateQuery, useAttendanceSummaryQuery, useMarkAttendanceMutation } from '../features/attendance/useAttendanceQuery'
+import { useAttendanceByDateQuery, useAttendanceSummaryQuery, useCreateAttendanceMutation, useUpdateAttendanceMutation } from '../features/attendance/useAttendanceQuery'
 import { AttendanceTable } from '../components/tables/AttendanceTable'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { EmptyState } from '../components/common/EmptyState'
@@ -7,6 +7,7 @@ import { Button } from '../components/forms/Button'
 import { StatCard } from '../components/cards/StatCard'
 import { MarkAttendanceModal } from '../components/modals/MarkAttendanceModal'
 import type { AttendanceRecord } from '../types/attendance'
+import type { MarkAttendanceValues } from '../features/attendance/attendanceSchema'
 
 const DEFAULT_DATE = new Date().toISOString().slice(0, 10)
 
@@ -17,28 +18,40 @@ export default function AttendancePage() {
 
   const summaryQuery = useAttendanceSummaryQuery(selectedDate)
   const attendanceQuery = useAttendanceByDateQuery(selectedDate)
-  const markAttendanceMutation = useMarkAttendanceMutation()
+  const createAttendanceMutation = useCreateAttendanceMutation()
+  const updateAttendanceMutation = useUpdateAttendanceMutation()
 
-  // const records = useMemo(() => attendanceQuery.data?.records ?? [], [attendanceQuery.data])
   const records = useMemo(() => attendanceQuery.data ?? [], [attendanceQuery.data])
+  const isSaving = createAttendanceMutation.isPending || updateAttendanceMutation.isPending
 
-const handleMarkAttendance = async (payload: { studentId: string; date: string; status: 'PRESENT' | 'ABSENT' }) => {
-  try {
-    await markAttendanceMutation.mutateAsync({
-      studentId: Number(payload.studentId),
-      date: payload.date,
-      status: payload.status,
-    })
-
-    attendanceQuery.refetch()
-    summaryQuery.refetch()
-
-    setIsMarkOpen(false)
-    setSelectedRecord(null)
-  } catch (error) {
-    console.error('Attendance save failed', error)
+  const openMarkModal = (record: AttendanceRecord) => {
+    setSelectedRecord(record)
+    setIsMarkOpen(true)
   }
-}
+
+  const handleSaveAttendance = async (payload: MarkAttendanceValues) => {
+    try {
+      if (selectedRecord?.attendanceId == null) {
+        await createAttendanceMutation.mutateAsync({
+          studentId: payload.studentId,
+          date: payload.date,
+          status: payload.status,
+        })
+      } else {
+        await updateAttendanceMutation.mutateAsync({
+          attendanceId: selectedRecord.attendanceId,
+          payload: { status: payload.status },
+        })
+      }
+    } catch (error) {
+      console.error('Attendance save failed', error)
+    } finally {
+      setIsMarkOpen(false)
+      setSelectedRecord(null)
+    }
+  }
+
+  const defaultSelection = records.find((record) => record.attendanceId == null) ?? records[0] ?? null
 
   return (
     <div className="space-y-6">
@@ -47,7 +60,15 @@ const handleMarkAttendance = async (payload: { studentId: string; date: string; 
           <h2 className="text-2xl font-semibold text-slate-900">Attendance</h2>
           <p className="text-sm text-slate-500">Track student attendance, filter by date, and update records.</p>
         </div>
-        <Button type="button" onClick={() => setIsMarkOpen(true)}>
+        <Button
+          type="button"
+          onClick={() => {
+            if (defaultSelection) {
+              openMarkModal(defaultSelection)
+            }
+          }}
+          disabled={!defaultSelection}
+        >
           Mark attendance
         </Button>
       </div>
@@ -79,20 +100,14 @@ const handleMarkAttendance = async (payload: { studentId: string; date: string; 
         <EmptyState title="No attendance records" description="No attendance has been recorded for this date yet." />
       ) : (
         <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
-          <AttendanceTable
-            records={records}
-            onMark={(record) => {
-              setSelectedRecord(record)
-              setIsMarkOpen(true)
-            }}
-          />
+          <AttendanceTable records={records} onMark={openMarkModal} />
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/5">
             <h3 className="text-lg font-semibold text-slate-900">Summary</h3>
             <div className="mt-6 grid gap-4">
-              {/* <StatCard label="Present" value={summaryQuery.data?.present ?? 0} accent="bg-emerald-500" /> */}
-              <StatCard label="Present" value={summaryQuery.data?.presentCount ?? 0} accent="bg-emerald-500" />
+              <StatCard label="Present" value={summaryQuery.data?.presentCount  ?? 0} accent="bg-emerald-500" />
               <StatCard label="Absent" value={summaryQuery.data?.absentCount ?? 0} accent="bg-rose-500" />
-              <StatCard label="Total" value={(summaryQuery.data?.presentCount ?? 0) + (summaryQuery.data?.absentCount ?? 0)} accent="bg-slate-500" />
+              <StatCard label="Total" value={(summaryQuery.data?.presentCount ?? 0) +
+(summaryQuery.data?.absentCount ?? 0)} accent="bg-slate-500" />
             </div>
           </div>
         </div>
@@ -100,15 +115,17 @@ const handleMarkAttendance = async (payload: { studentId: string; date: string; 
 
       <MarkAttendanceModal
         isOpen={isMarkOpen}
+        attendanceId={selectedRecord?.attendanceId ?? null}
         studentId={selectedRecord?.studentId}
         studentName={selectedRecord?.studentName}
-        date={selectedDate}
+        date={selectedRecord?.date ?? selectedDate}
+        initialStatus={selectedRecord?.status ?? 'PRESENT'}
         onClose={() => {
           setIsMarkOpen(false)
           setSelectedRecord(null)
         }}
-        onSubmit={handleMarkAttendance}
-        isLoading={markAttendanceMutation.isPending}
+        onSubmit={handleSaveAttendance}
+        isLoading={isSaving}
       />
     </div>
   )

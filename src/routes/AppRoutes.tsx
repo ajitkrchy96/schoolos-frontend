@@ -7,6 +7,7 @@ import LoginPage from '../pages/LoginPage'
 import DashboardPage from '../pages/DashboardPage'
 import UsersPage from '../pages/UsersPage'
 import StudentsPage from '../pages/StudentsPage'
+import StudentStatusManagementPage from '../pages/StudentStatusManagementPage'
 import FeesPage from '../pages/FeesPage'
 import AttendancePage from '../pages/AttendancePage'
 import NotificationsPage from '../pages/NotificationsPage'
@@ -36,6 +37,7 @@ export function AppRoutes() {
           }
         />
         <Route path="students" element={<StudentsPage />} />
+        <Route path="student-status" element={<StudentStatusManagementPage />} />
         <Route path="fees" element={<FeesPage />} />
         <Route path="attendance" element={<AttendancePage />} />
         <Route path="notifications" element={<NotificationsPage />} />

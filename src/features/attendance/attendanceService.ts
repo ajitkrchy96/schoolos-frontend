@@ -1,48 +1,28 @@
 import axiosClient from '../../api/axiosClient'
-import type { AttendanceRecord, AttendanceSummary, MarkAttendanceRequest } from '../../types/attendance'
+import type {
+  AttendanceRecord,
+  AttendanceSummary,
+  CreateAttendanceRequest,
+  UpdateAttendanceRequest,
+} from '../../types/attendance'
 
 const SCHOOL_ID = '1'
 
 export const attendanceService = {
-  // markAttendance: async (payload: MarkAttendanceRequest) => {
-  //   const response = await axiosClient.post(`/schools/${SCHOOL_ID}/attendance`, [payload])
-  //   return response.data
-  // },
-
-  markAttendance: async (payload: MarkAttendanceRequest) => {
-  const requestPayload = [
-    {
-      studentId: Number(payload.studentId),
-      date: payload.date,
-      status: payload.status,
-    },
-  ]
-
-  console.log('ATTENDANCE REQUEST', requestPayload)
-
-  const response = await axiosClient.post(
-    `/schools/${SCHOOL_ID}/attendance`,
-    requestPayload,
-  )
-
-  console.log('ATTENDANCE RESPONSE', response.data)
-
-  return response.data
-},
-
   fetchAttendanceByDate: async (date: string) => {
-    // const response = await axiosClient.get<{ records: AttendanceRecord[] }>(`/schools/${SCHOOL_ID}/attendance/date`, {
-    //   params: { date },
-    // })
-    // return response.data
-        const response = await axiosClient.get<AttendanceRecord[]>(`/schools/${SCHOOL_ID}/attendance/date`, {
+    const response = await axiosClient.get<AttendanceRecord[]>(`/schools/${SCHOOL_ID}/attendance/date`, {
       params: { date },
     })
     return response.data
   },
 
-  fetchStudentAttendance: async (studentId: string) => {
-    const response = await axiosClient.get<{ records: AttendanceRecord[] }>(`/schools/${SCHOOL_ID}/attendance/student/${studentId}`)
+  createAttendance: async (payload: CreateAttendanceRequest) => {
+    const response = await axiosClient.post(`/schools/${SCHOOL_ID}/attendance`, payload)
+    return response.data
+  },
+
+  updateAttendance: async (attendanceId: number, payload: UpdateAttendanceRequest) => {
+    const response = await axiosClient.patch(`/schools/${SCHOOL_ID}/attendance/${attendanceId}`, payload)
     return response.data
   },
 
@@ -50,6 +30,7 @@ export const attendanceService = {
     const response = await axiosClient.get<AttendanceSummary>(`/schools/${SCHOOL_ID}/attendance/summary`, {
       params: { date },
     })
+    console.log('SUMMARY RESPONSE', response.data)
     return response.data
   },
 }

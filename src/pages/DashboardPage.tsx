@@ -43,11 +43,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-5 lg:grid-cols-2">
-        <StatCard label="Total students" value={data.totalStudents} accent="bg-indigo-500" />
+        {/* <StatCard label="Total students" value={data.totalStudents} accent="bg-indigo-500" /> */}
+        <StatCard label="Total students" value={data.presentToday + data.absentToday} accent="bg-indigo-500" />
         <StatCard label="Present today" value={data.presentToday} accent="bg-emerald-500" />
         <StatCard label="Absent today" value={data.absentToday} accent="bg-rose-500" />
         <StatCard label="Pending fees" value={data.pendingFeesCount} accent="bg-amber-500" />
-        <StatCard label="Collected" value={`$${data.totalCollectedAmount.toLocaleString()}`} accent="bg-sky-500" />
+        <StatCard label="Collected" value={`₹${data.totalCollectedAmount.toLocaleString()}`} accent="bg-sky-500" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
